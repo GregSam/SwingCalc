@@ -1,40 +1,39 @@
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridBagLayoutInfo;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Iterator;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 	
 public class SwingCalculator extends JPanel {
 	
-	JButton b1,b2,b3,b4,b5,b6,b7,b8,b9,b0,b_plus, b_minus, b_result;
-	JLabel textResult;
+	JButton b1,b2,b3,b4,b5,b6,b7,b8,b9,b0,b_plus, b_minus, b_result, clearBtn, multiBtn, divideBtn;
+	JTextArea textResult;
 	GridBagConstraints gbc = new GridBagConstraints();
-	int a=0, b=0, result=0;
-	enum Operation {PLUS , MINUS };
-	Operation operation;
+	long  a=0, b=0, c=0, result=0;
+	enum Operation {PLUS , MINUS, MULTI, DIVIDE };
+	Operation operation, lastOperation;
 	
 	
-	ArrayList operationStack = new ArrayList();
+//	ArrayList operationStack = new ArrayList();
 	
 	public  SwingCalculator(){
 		
 		setLayout(new GridBagLayout());
 		gbc.insets = new Insets(5, 	5, 5, 5);
-		textResult = new JLabel();
+		textResult = new JTextArea();
+		
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		gbc.gridwidth = 3;
 		gbc.fill = GridBagConstraints.HORIZONTAL;
+		gbc.anchor = GridBagConstraints.EAST;
 		add(textResult, gbc);
 		
 		b1 = new JButton("1");
@@ -44,7 +43,6 @@ public class SwingCalculator extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				
 				textResult.setText(textResult.getText()+b1.getText());
-				a=Integer.parseInt(textResult.getText());
 			}
 		});
 		
@@ -80,6 +78,22 @@ public class SwingCalculator extends JPanel {
 		gbc.gridy = 1;
 		gbc.gridwidth = 1;
 		add(b3,gbc);
+		
+		clearBtn = new JButton("CLR");
+		clearBtn.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				textResult.setText("");
+				a=0;
+				b=0;
+			}
+		});
+		
+		gbc.gridx = 3;
+		gbc.gridy = 1;
+		gbc.gridwidth = 1;
+		add(clearBtn,gbc);
 		
 		b4 = new JButton("4");
 		b4.addActionListener(new ActionListener() {
@@ -123,6 +137,23 @@ public class SwingCalculator extends JPanel {
 		gbc.gridwidth = 1;
 		add(b6,gbc);
 		
+		multiBtn = new JButton("*");
+		multiBtn.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				operation = Operation.MULTI;
+				a=Integer.parseInt(textResult.getText());
+				
+				textResult.setText("");
+			}
+		});
+		
+		gbc.gridx = 3;
+		gbc.gridy = 2;
+		gbc.gridwidth = 1;
+		add(multiBtn,gbc);
+		
 		b7 = new JButton("7");
 		b7.addActionListener(new ActionListener() {
 			
@@ -165,6 +196,23 @@ public class SwingCalculator extends JPanel {
 		gbc.gridwidth = 1;
 		add(b9,gbc);
 		
+		divideBtn = new JButton("/");
+		divideBtn.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				operation = Operation.DIVIDE;
+				a=Integer.parseInt(textResult.getText());
+				
+				textResult.setText("");
+			}
+		});
+		
+		gbc.gridx = 3;
+		gbc.gridy = 3;
+		gbc.gridwidth = 1;
+		add(divideBtn,gbc);
+		
 		b0 = new JButton("0");
 		b0.addActionListener(new ActionListener() {
 			
@@ -184,9 +232,9 @@ public class SwingCalculator extends JPanel {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				operation = Operation.PLUS;
 				
-				b=Integer.parseInt(textResult.getText());
+				operation = Operation.PLUS;
+				a=Integer.parseInt(textResult.getText());
 				textResult.setText("");
 			}
 		});
@@ -201,8 +249,8 @@ public class SwingCalculator extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
-				operationStack.add(Integer.parseInt(textResult.getText()));
-				operationStack.add(b_minus.getText());
+				operation = Operation.MINUS;
+				a=Integer.parseInt(textResult.getText());
 				textResult.setText("");
 			}
 		});
@@ -217,10 +265,34 @@ public class SwingCalculator extends JPanel {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				
+				
+				
 				if(operation==Operation.PLUS){
-					textResult.setText(Integer.toString(a+b));
+					b=Integer.parseInt(textResult.getText());
+					textResult.setText(Long.toString(a+b));
 				}
 				
+				if(operation==Operation.MINUS){
+					
+					b=Integer.parseInt(textResult.getText());
+					
+					textResult.setText(Long.toString(c=a-b));
+				}
+				
+				if(operation==Operation.MULTI){
+					
+					b=Integer.parseInt(textResult.getText());
+					
+					textResult.setText(Long.toString(c=a*b));
+				}
+				
+				if(operation==Operation.DIVIDE){
+					
+					b=Integer.parseInt(textResult.getText());
+					
+					textResult.setText(Long.toString(c=a/b));
+				}
 					
 			}
 		});
@@ -238,7 +310,8 @@ public class SwingCalculator extends JPanel {
 					JFrame frame = new JFrame("My new Swing UI");
 					SwingCalculator swingCalc = new SwingCalculator();
 					
-					frame.setSize(500, 400);
+					frame.setSize(300, 300);
+					frame.setResizable(false);
 					frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 					frame.setVisible(true);
 					frame.add(swingCalc);
